@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", sans-serif;
+  
+  --color-primary: var(--theme-primary);
+  --color-surface: var(--theme-surface);
+  --color-card: var(--theme-card);
+  --color-border: var(--theme-border);
+  --color-text-main: var(--theme-text-main);
+  --color-text-muted: var(--theme-text-muted);
+  --color-bg-base: var(--theme-bg-base);
+}
+
+:root {
+  font-family: var(--font-inter);
+  
+  /* Light Mode Variables */
+  --theme-primary: #d9463e;
+  --theme-bg-base: #f8fafc;
+  --theme-surface: #ffffff;
+  --theme-card: #ffffff;
+  --theme-border: #e2e8f0;
+  --theme-text-main: #0f172a;
+  --theme-text-muted: #64748b;
+}
+
+.dark {
+  /* Dark Mode Variables (uma.guide style) */
+  --theme-primary: #d9463e;
+  --theme-bg-base: #121212;
+  --theme-surface: #1e1e1e;
+  --theme-card: #2d2d2d;
+  --theme-border: #3d3d3d;
+  --theme-text-main: #e5e5e5;
+  --theme-text-muted: #a3a3a3;
+}
+
+body {
+  @apply bg-bg-base text-text-main antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-200;
+}
+
+/* Base Card Style */
+.uma-card {
+  @apply bg-card border border-border rounded-xl shadow-sm transition-all duration-200 overflow-hidden;
+}
+
+.uma-card:hover {
+  @apply shadow-md border-primary/50;
+}
+.dark .uma-card:hover {
+  @apply border-gray-500 shadow-lg shadow-black/50;
+}
+
+/* Minimalist Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--theme-text-muted); }

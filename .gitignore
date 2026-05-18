@@ -1,0 +1,37 @@
+# Node modules (Thư mục thư viện cài đặt, rất nặng và không cần push)
+node_modules/
+**/node_modules/
+
+# Environment variables (Tệp chứa mật khẩu, key, token bảo mật - CẤM PUSH)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env
+**/.env.*
+
+# Logs (Nhật ký lỗi khi chạy npm)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories (Thư mục cấu hình của VS Code, WebStorm...)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS metadata (File hệ điều hành tự tạo)
+.DS_Store
+Thumbs.db
+
+# Build outputs (Thư mục build đầu ra, Render sẽ tự tạo khi deploy)
+dist/
+**/dist/
+build/
+**/build/
