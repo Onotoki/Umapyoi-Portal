@@ -36,15 +36,15 @@ const CharacterListPage = () => {
             Explore and filter the complete roster of trainable Umamusume.
           </p>
         </div>
-        <div className="relative w-full md:w-96">
+        <div className="relative w-full md:w-72">
           <input 
             type="text" 
             placeholder="Tìm kiếm theo tên hoặc trang phục..." 
-            className="w-full bg-card text-text-main px-6 py-4 rounded-2xl border border-border outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-text-muted shadow-sm"
+            className="w-full bg-card text-text-main px-5 py-3 rounded-xl border border-border outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-text-muted text-sm shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <span className="absolute right-6 top-4.5 text-text-muted">🔍</span>
+          <span className="absolute right-4 top-3 text-text-muted">🔍</span>
         </div>
       </header>
 
