@@ -1,0 +1,9 @@
+- [ ] Create backend Mongoose model `Skill`
+- [ ] Add `skillRoutes.js` with GET endpoint
+- [ ] Update `server.js` to use skill routes
+- [ ] Add npm script for scraping skills
+- [ ] Implement `backend/scripts/scrape_skills.js`
+- [ ] Create frontend page `SkillsPage.jsx`
+- [ ] Update navigation in `App.jsx` (link and route)
+- [ ] Add CSS for skill cards if needed
+- [ ] Test end‑to‑end functionality

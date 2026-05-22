@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const characterRoutes = require('./routes/characterRoutes');
 const supportCardRoutes = require('./routes/supportCardRoutes');
+const skillRoutes = require('./routes/skillRoutes');
 
 const app = express();
 
@@ -17,6 +18,12 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/umapyoi')
 
 app.use('/api/characters', characterRoutes);
 app.use('/api/support-cards', supportCardRoutes);
+app.use('/api/skills', skillRoutes);
+
+// Route kiểm tra sức khỏe (Health Check) phục vụ Ping chống ngủ đông của Render
+app.get('/', (req, res) => {
+  res.send('Umapyoi Portal Backend is running! 🚀');
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

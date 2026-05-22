@@ -5,6 +5,7 @@ import CharacterListPage from './pages/CharacterListPage';
 import SupportCardsPage from './pages/SupportCardsPage';
 import GuidesPage from './pages/GuidesPage';
 import DonatePage from './pages/DonatePage';
+import SkillsPage from './pages/SkillsPage';
 import './index.css';
 
 const Navigation = () => {
@@ -64,7 +65,7 @@ const Navigation = () => {
           <Link to="/guides" className={`py-4 text-sm ${isActive('/guides')}`}>Guides</Link>
           <Link to="/characters" className={`py-4 text-sm ${isActive('/characters')}`}>Characters</Link>
           <Link to="/support-cards" className={`py-4 text-sm ${isActive('/support-cards')}`}>Support Cards</Link>
-          <a href="#" className="py-4 text-sm text-text-muted hover:text-text-main transition-colors border-b-2 border-transparent hover:border-border">Skills</a>
+          <Link to="/skills" className={`py-4 text-sm ${isActive('/skills')}`}>Skills</Link>
           <a href="#" className="py-4 text-sm text-text-muted hover:text-text-main transition-colors border-b-2 border-transparent hover:border-border">Champions Meeting</a>
         </nav>
       </div>
@@ -83,6 +84,7 @@ const App = () => {
           <Route path="/support-cards" element={<SupportCardsPage />} />
           <Route path="/guides" element={<GuidesPage />} />
           <Route path="/donate" element={<DonatePage />} />
+          <Route path="/skills" element={<SkillsPage />} />
         </Routes>
       </div>
     </div>
