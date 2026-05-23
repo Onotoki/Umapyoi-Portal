@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import CHAMPIONS_MEETINGS from "../data/championsMeetings";
 
 const getCharacterImage = (name, characters, preferVariant = false) => {
@@ -301,11 +302,13 @@ const SkillCard = ({ skillData, reason }) => {
 };
 
 const ChampionsMeetingPage = () => {
+  const { cmId } = useParams();
+  const navigate = useNavigate();
   const [characters, setCharacters] = useState([]);
   const [skills, setSkills] = useState([]);
   const [umaMap, setUmaMap] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedCM, setSelectedCM] = useState(null);
+  const selectedCM = cmId ? CHAMPIONS_MEETINGS.find(cm => cm.id === cmId) : null;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -371,7 +374,7 @@ const ChampionsMeetingPage = () => {
           {CHAMPIONS_MEETINGS.map((cm) => (
             <div
               key={cm.id}
-              onClick={() => setSelectedCM(cm)}
+              onClick={() => navigate(cm.id)}
               style={{
                 background: "var(--theme-card)",
                 border: "1px solid var(--theme-border)",
@@ -422,7 +425,7 @@ const ChampionsMeetingPage = () => {
     <div className="flex-1 max-w-5xl mx-auto">
       {/* Back button */}
       <button
-        onClick={() => setSelectedCM(null)}
+        onClick={() => navigate('/champions-meeting')}
         style={{
           background: "none",
           border: "none",

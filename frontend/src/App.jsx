@@ -87,6 +87,7 @@ const App = () => {
           <Route path="/donate" element={<DonatePage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/champions-meeting" element={<ChampionsMeetingPage />} />
+          <Route path="/champions-meeting/:cmId" element={<ChampionsMeetingPage />} />
         </Routes>
       </div>
     </div>
