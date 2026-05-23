@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
@@ -24,9 +25,18 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/uma-characters', umaCharacterRoutes);
 app.use('/api/icons', iconUploadRoutes);
 
+// Serve frontend dist trong production
+const frontendDist = path.join(__dirname, '..', 'frontend', 'dist');
+app.use(express.static(frontendDist));
+
 // Route kiểm tra sức khỏe (Health Check) phục vụ Ping chống ngủ đông của Render
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.send('Umapyoi Portal Backend is running! 🚀');
+});
+
+// Catch-all — cho SPA routing (React Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
