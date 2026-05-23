@@ -232,70 +232,139 @@ const CM_TIER_LEGEND = [
   },
 ];
 
-const SkillCard = ({ skillData, reason }) => {
+const uniqueSkillOwnerMap = {
+  "Angling & Scheming": "Seiun Sky",
+  "Angling and Scheming": "Seiun Sky",
+  "Victoria por Plancha": "El Condor Pasa",
+  "Victoria por Plancha ☆": "El Condor Pasa",
+  "Budding Blossom": "Nishino Flower",
+  "Let's Pump Some Iron!": "Mejiro Ryan",
+  "Louder! Tracen Cheer!": { name: "King Halo", preferVariant: true },
+  "Triumphant Pulse": "Oguri Cap",
+  "Shadow Break": "Narita Brian",
+  "Lights of Vaudeville": "Fuji Kiseki",
+  "All Charged! It's Go Time!": "Ines Fujin",
+  "Operation Cacao": { name: "Mihono Bourbon", preferVariant: true },
+};
+
+const normalizeSkillName = (name) =>
+  (name || "")
+    .toLowerCase()
+    .replace(/[☆★]/g, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+
+const uniqueSkillOwnerNormMap = Object.entries(uniqueSkillOwnerMap).reduce(
+  (acc, [k, v]) => {
+    acc[normalizeSkillName(k)] = v;
+    return acc;
+  },
+  {},
+);
+
+const goldHighlightSkillNames = new Set(["Speed Star", "Daring Strike"]);
+const rngSkillNames = new Set([
+  "Final Push",
+  "Head On",
+  "Ignited Spirit PWR",
+  "Nimble Navigator",
+  "Slick Surge",
+  "Updrafters",
+]);
+
+const SkillCard = ({ skillData, characters, forceGold = false, displayName }) => {
   if (!skillData) return null;
+  const isUnique = skillData.skillCategory === "Unique" || skillData.skillId >= 900000;
+  const isGoldHighlight = forceGold || goldHighlightSkillNames.has(skillData.skillName);
+  const isRngSkill = rngSkillNames.has(skillData.skillName);
+  const ownerCfg =
+    uniqueSkillOwnerMap[skillData.skillName] ||
+    uniqueSkillOwnerNormMap[normalizeSkillName(skillData.skillName)];
+  const ownerName = typeof ownerCfg === "string" ? ownerCfg : ownerCfg?.name;
+  const ownerObj = ownerName ? getCharacterImage(ownerName, characters, !!ownerCfg?.preferVariant) : null;
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 10,
-        padding: "10px 12px",
-        background: "var(--theme-card)",
-        border: "1px solid var(--theme-border)",
-        borderRadius: 10,
+        gap: 8,
+        padding: "6px 8px",
+        background: isUnique
+          ? "linear-gradient(to right, #cfd2f4 0%, #d9cff1 45%, #f0d1ea 100%)"
+          : isGoldHighlight
+            ? "linear-gradient(135deg, #f6e3a1 0%, #efc86a 55%, #e8b95b 100%)"
+          : "linear-gradient(to bottom, #ffffff 0%, #e8e5ec 50%, #d2cdd8 100%)",
+        border: isUnique
+          ? "1px solid #c8c4e0"
+          : isGoldHighlight
+            ? "1px solid #c89634"
+            : "1px solid #b0aab8",
+        boxShadow: isUnique
+          ? "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 6px rgba(140,120,200,0.15)"
+          : isGoldHighlight
+            ? "inset 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px rgba(255,206,120,0.45), 0 3px 10px rgba(154,106,27,0.22)"
+          : "inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 3px rgba(0,0,0,0.06)",
+        borderRadius: 6,
       }}
     >
-      <img
-        src={`https://gametora.com/images/umamusume/skill_icons/utx_ico_skill_${skillData.iconId}.png`}
-        alt=""
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: 6,
-          flexShrink: 0,
-          background: "var(--theme-surface)",
-          objectFit: "cover",
-        }}
-        onError={(e) => {
-          e.target.style.display = "none";
-        }}
-      />
+      <div style={{ position: "relative", width: 28, height: 28, flexShrink: 0 }}>
+        <img
+          src={`https://gametora.com/images/umamusume/skill_icons/utx_ico_skill_${skillData.iconId}.png`}
+          alt=""
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 5,
+            background: "var(--theme-surface)",
+            objectFit: "cover",
+            display: "block",
+          }}
+          onError={(e) => {
+            e.target.style.display = "none";
+          }}
+        />
+        {isRngSkill && (
+          <span
+            style={{
+              position: "absolute",
+              left: -3,
+              top: -4,
+              fontSize: 9,
+              fontWeight: 900,
+              lineHeight: 1,
+              color: "#ef4444",
+              background: "#fff7ed",
+              border: "1px solid #fb923c",
+              borderRadius: 4,
+              padding: "2px 3px 1px",
+              letterSpacing: "0.04em",
+            }}
+          >
+            RNG
+          </span>
+        )}
+      </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
             fontWeight: 700,
-            fontSize: 13,
-            color: "var(--theme-text-main)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            fontSize: 12,
+            color: isUnique ? "#3d2d5c" : isGoldHighlight ? "#5a3900" : "#1a1a2e",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            lineHeight: 1.3,
           }}
         >
-          {skillData.skillName}
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            color: "var(--theme-text-muted)",
-            marginTop: 1,
-          }}
-        >
-          {reason}
+          {displayName || skillData.skillName}
         </div>
       </div>
-      {skillData.needSkillPoint > 0 && (
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 800,
-            color: "#eab308",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          {skillData.needSkillPoint} SP
-        </span>
+      {isUnique && ownerObj?.image_url && (
+        <img
+          src={ownerObj.image_url}
+          alt={ownerName}
+          style={{ width: 28, height: 28, borderRadius: 14, objectFit: "cover", border: "2px solid #d0c8e8" }}
+        />
       )}
     </div>
   );
@@ -395,7 +464,11 @@ const ChampionsMeetingPage = () => {
                 e.currentTarget.style.borderColor = "var(--theme-border)";
               }}
             >
-              <span style={{ fontSize: 40 }}>{cm.track.icon || "🏟️"}</span>
+              {cm.track.icon?.startsWith("http") ? (
+                <img src={cm.track.icon} alt="" style={{ width: 80, height: 52, borderRadius: 8, objectFit: "contain" }} />
+              ) : (
+                <span style={{ fontSize: 40 }}>{cm.track.icon || "🏟️"}</span>
+              )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h2 style={{ fontSize: 18, fontWeight: 800, color: "var(--theme-text-main)", marginBottom: 4 }}>
                   {cm.title}
@@ -403,13 +476,7 @@ const ChampionsMeetingPage = () => {
                 <p style={{ fontSize: 13, color: "var(--theme-text-muted)", lineHeight: 1.5, margin: 0 }}>
                   {cm.description}
                 </p>
-                <div style={{ display: "flex", gap: 12, marginTop: 8, fontSize: 12, color: "var(--theme-text-muted)" }}>
-                  <span>{cm.track.distance}</span>
-                  <span>•</span>
-                  <span>{cm.track.ground}</span>
-                  <span>•</span>
-                  <span>{cm.track.surface}</span>
-                </div>
+
               </div>
               <span style={{ fontSize: 20, color: "var(--theme-text-muted)" }}>→</span>
             </div>
@@ -453,51 +520,6 @@ const ChampionsMeetingPage = () => {
         </p>
       </header>
 
-      {/* Track Info Banner */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 12,
-          padding: "16px 20px",
-          background: "var(--theme-card)",
-          border: "1px solid var(--theme-border)",
-          borderRadius: 14,
-          marginBottom: 32,
-        }}
-      >
-        {[
-          { label: "Distance", value: data.track.distance },
-          { label: "Ground", value: data.track.ground },
-          { label: "Surface", value: data.track.surface },
-          { label: "Best Strategy", value: data.track.strategy },
-        ].map((item) => (
-          <div
-            key={item.label}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              paddingRight: 16,
-              borderRight: "1px solid var(--theme-border)",
-            }}
-          >
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
-              {item.label}
-            </span>
-            <span
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "var(--theme-text-main)",
-              }}
-            >
-              {item.value}
-            </span>
-          </div>
-        ))}
-      </div>
-
       {/* Tierlist */}
       <section className="mb-10">
         <h2
@@ -521,7 +543,7 @@ const ChampionsMeetingPage = () => {
         ))}
         {/* Legend dưới bảng */}
         <div
-          style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 5 }}
+          style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 5, justifyContent: "center" }}
         >
           {CM_TIER_LEGEND.map((lg, idx) => (
             <div
@@ -540,10 +562,10 @@ const ChampionsMeetingPage = () => {
                   src={lg.icon}
                   alt=""
                   style={{
-                    width: 20,
-                    height: 20,
-                    marginRight: 7,
-                    borderRadius: 4,
+                    width: 28,
+                    height: 28,
+                    marginRight: 8,
+                    borderRadius: 5,
                     objectFit: "cover",
                   }}
                 />
@@ -551,70 +573,6 @@ const ChampionsMeetingPage = () => {
                 <span style={{ marginRight: 7 }}>{lg.icon}</span>
               )}
               <span>{lg.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Recommended Skills */}
-      <section className="mb-10">
-        <h2
-          className="text-xl font-bold text-text-main mb-4 flex items-center gap-3"
-          style={{
-            letterSpacing: '-0.02em',
-            textShadow: '0 1px 4px rgba(0,0,0,0.06)',
-            borderLeft: '4px solid var(--theme-text-main)',
-            paddingLeft: 14,
-          }}
-        >
-          <span>Recommended Skills</span>
-        </h2>
-
-        <div className="space-y-5">
-          {[
-            {
-              label: "Essential",
-              icon: "⭐",
-              color: "#f59e0b",
-              items: data.skills.essential,
-            },
-            {
-              label: "Recommended",
-              icon: "👍",
-              color: "#3b82f6",
-              items: data.skills.recommended,
-            },
-            {
-              label: "Situational",
-              icon: "📌",
-              color: "#64748b",
-              items: data.skills.situational,
-            },
-          ].map((group) => (
-            <div key={group.label}>
-              <div className="flex items-center gap-2 mb-2">
-                <span>{group.icon}</span>
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 800,
-                    color: group.color,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  {group.label}
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {group.items.map((item) => (
-                  <SkillCard
-                    key={item.skillId}
-                    skillData={skillMap[item.skillId]}
-                    reason={item.reason}
-                  />
-                ))}
-              </div>
             </div>
           ))}
         </div>
@@ -662,7 +620,7 @@ const ChampionsMeetingPage = () => {
         </div>
       </section>
 
-      {/* Tips */}
+      {/* Recommended Skills */}
       <section className="mb-10">
         <h2
           className="text-xl font-bold text-text-main mb-4 flex items-center gap-3"
@@ -673,38 +631,46 @@ const ChampionsMeetingPage = () => {
             paddingLeft: 14,
           }}
         >
-          <span>Tips & Notes</span>
+          <span>Recommended Skills</span>
         </h2>
-        <div
-          style={{
-            background: "var(--theme-card)",
-            border: "1px solid var(--theme-border)",
-            borderRadius: 12,
-            padding: "16px 20px",
-          }}
-        >
-          <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
-            {data.tips.map((tip, i) => (
-              <li
-                key={i}
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  padding: "10px 0",
-                  borderBottom:
-                    i < data.tips.length - 1
-                      ? "1px solid var(--theme-border)"
-                      : "none",
-                  fontSize: 13,
-                  color: "var(--theme-text-main)",
-                  lineHeight: 1.5,
-                }}
-              >
-                <span style={{ flexShrink: 0, marginTop: 1 }}>💡</span>
-                <span>{tip}</span>
-              </li>
-            ))}
-          </ul>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
+          {[
+            { key: "front", label: "Front Runner", icon: "/icons/strategy/front.png", color: "#2b7be4" },
+            { key: "pace", label: "Pace Chaser", icon: "/icons/strategy/pace.png", color: "#38a169" },
+            { key: "late", label: "Late Surger", icon: "/icons/strategy/late.png", color: "#dd6b20" },
+            { key: "end", label: "End Closer", icon: "/icons/strategy/end.png", color: "#e53e3e" },
+          ].map((group) => (
+            <div key={group.key} style={{ background: "var(--theme-card)", border: "1px solid var(--theme-border)", borderRadius: 12, padding: "14px 12px" }}>
+              <div className="flex items-center gap-2 mb-3" style={{ borderBottom: `2px solid ${group.color}33`, paddingBottom: 8 }}>
+                <img src={group.icon} alt="" style={{ width: 28, height: 28 }} />
+                <span style={{ fontSize: 14, fontWeight: 800, color: group.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  {group.label}
+                </span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {(data.skills[group.key]?.sections || []).map((section) => (
+                  <div key={section.title}>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: group.color, marginBottom: 6, textDecoration: "underline", textUnderlineOffset: 3 }}>
+                      {section.title}
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {section.items.map((item) => (
+                        <div key={`${section.title}-${item.skillId}`} style={{ flex: "0 1 calc(50% - 4px)", minWidth: 0 }}>
+                        <SkillCard
+                          skillData={skillMap[item.skillId]}
+                          characters={characters}
+                          forceGold={!!item.gold}
+                          displayName={item.reason}
+                        />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </div>
