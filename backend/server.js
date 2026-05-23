@@ -35,7 +35,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Catch-all — cho SPA routing (React Router)
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
