@@ -6,6 +6,7 @@ import SupportCardsPage from './pages/SupportCardsPage';
 import GuidesPage from './pages/GuidesPage';
 import DonatePage from './pages/DonatePage';
 import SkillsPage from './pages/SkillsPage';
+import ChampionsMeetingPage from './pages/ChampionsMeetingPage';
 import './index.css';
 
 const Navigation = () => {
@@ -66,7 +67,7 @@ const Navigation = () => {
           <Link to="/characters" className={`py-4 text-sm ${isActive('/characters')}`}>Characters</Link>
           <Link to="/support-cards" className={`py-4 text-sm ${isActive('/support-cards')}`}>Support Cards</Link>
           <Link to="/skills" className={`py-4 text-sm ${isActive('/skills')}`}>Skills</Link>
-          <a href="#" className="py-4 text-sm text-text-muted hover:text-text-main transition-colors border-b-2 border-transparent hover:border-border">Champions Meeting</a>
+          <Link to="/champions-meeting" className={`py-4 text-sm ${isActive('/champions-meeting')}`}>Champions Meeting</Link>
         </nav>
       </div>
     </header>
@@ -85,6 +86,7 @@ const App = () => {
           <Route path="/guides" element={<GuidesPage />} />
           <Route path="/donate" element={<DonatePage />} />
           <Route path="/skills" element={<SkillsPage />} />
+          <Route path="/champions-meeting" element={<ChampionsMeetingPage />} />
         </Routes>
       </div>
     </div>

@@ -1,53 +1,49 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
-// ===== CONSTANTS =====
-const CATEGORIES = [
-  "All",
-  "Unique",
-  "Speed Boost",
-  "Acceleration",
-  "Recovery",
-  "Passive",
-  "Debuff",
-  "Lane Effect",
-  "Vision",
-  "Special",
+const GAMETORA_FILTERS = [
+  { id: 1001, iconId: 10011, label: "Handed", color: { bg: "#64748b", text: "#fff" } },
+  { id: 1002, iconId: 10021, label: "Course", color: { bg: "#64748b", text: "#fff" } },
+  { id: 1003, iconId: 10031, label: "Track", color: { bg: "#64748b", text: "#fff" } },
+  { id: 1004, iconId: 10041, label: "Weather", color: { bg: "#64748b", text: "#fff" } },
+  { id: 1005, iconId: 10051, label: "Post", color: { bg: "#64748b", text: "#fff" } },
+  { id: 1006, iconId: 10061, label: "Luck", color: { bg: "#64748b", text: "#fff" } },
+  { id: 2001, iconId: 20011, label: "Speed", color: { bg: "#2563eb", text: "#fff" } },
+  { id: 2002, iconId: 20021, label: "Recovery", color: { bg: "#16a34a", text: "#fff" } },
+  { id: 2004, iconId: 20041, label: "Accel", color: { bg: "#d97706", text: "#fff" } },
+  { id: 2005, iconId: 20051, label: "Lane", color: { bg: "#0891b2", text: "#fff" } },
+  { id: 2006, iconId: 20061, label: "Focus", color: { bg: "#dc2626", text: "#fff" } },
+  { id: 2009, iconId: 20091, label: "Vision", color: { bg: "#9333ea", text: "#fff" } },
+  { id: 3001, iconId: 30011, label: "Hesitate", color: { bg: "#dc2626", text: "#fff" } },
+  { id: 3002, iconId: 30021, label: "Gambit", color: { bg: "#dc2626", text: "#fff" } },
+  { id: 3004, iconId: 30041, label: "Frenzy", color: { bg: "#dc2626", text: "#fff" } },
+  { id: 3005, iconId: 30051, label: "Jam", color: { bg: "#dc2626", text: "#fff" } },
+  { id: 3007, iconId: 30071, label: "Smoke", color: { bg: "#dc2626", text: "#fff" } },
 ];
 
-const RARITIES = [
-  { label: "All", value: "All" },
-  { label: "★★★", value: 3 },
-  { label: "★★", value: 2 },
-  { label: "★", value: 1 },
+const EXTRA_FILTERS = [
+  { id: "unique", iconId: 20013, label: "Unique", color: { bg: "#7c3aed", text: "#fff" } },
+  { id: "special", iconId: 1010011, label: "Special", color: { bg: "#b45309", text: "#fff" } },
 ];
 
-const CATEGORY_COLOR = {
-  Unique: { bg: "#7c3aed", text: "#fff" },
-  "Speed Boost": { bg: "#2563eb", text: "#fff" },
-  Acceleration: { bg: "#d97706", text: "#fff" },
-  Recovery: { bg: "#16a34a", text: "#fff" },
-  Passive: { bg: "#64748b", text: "#fff" },
-  Debuff: { bg: "#dc2626", text: "#fff" },
-  "Lane Effect": { bg: "#0891b2", text: "#fff" },
-  Vision: { bg: "#9333ea", text: "#fff" },
-  Special: { bg: "#b45309", text: "#fff" },
-};
+const ALL_FILTERS = [...GAMETORA_FILTERS, ...EXTRA_FILTERS];
 
-const RARITY_STAR_COLOR = {
-  3: "#e9d85a",
-  2: "#c0c0c0",
-  1: "#cd7f32",
-};
+const FILTER_COLOR_MAP = Object.fromEntries(
+  ALL_FILTERS.map((f) => [f.id, f.color])
+);
 
-// Icon URL từ GameTora (dùng iconId trực tiếp)
 const getIconUrl = (iconId) =>
-  `https://gametora.com/images/umamusume/skills/ut_icon_skill_${iconId}.png`;
+  `https://gametora.com/images/umamusume/skill_icons/utx_ico_skill_${iconId}.png`;
 
-// ===== TOOLTIP COMPONENT =====
-const SkillTooltip = ({ skill, anchorRef, visible }) => {
+const getFilterId = (skill) => {
+  const fid = Math.floor(skill.iconId / 10);
+  if (GAMETORA_FILTERS.some((f) => f.id === fid)) return fid;
+  return null;
+};
+
+const SkillTooltip = ({ skill, visible }) => {
   if (!visible) return null;
-
-  const cat = CATEGORY_COLOR[skill.skillCategory] || { bg: "#334155", text: "#fff" };
+  const filterId = getFilterId(skill) || (skill.skillCategory === "Unique" ? "unique" : skill.skillCategory === "Special" ? "special" : null);
+  const cat = FILTER_COLOR_MAP[filterId] || { bg: "#334155", text: "#fff" };
 
   return (
     <div
@@ -57,175 +53,145 @@ const SkillTooltip = ({ skill, anchorRef, visible }) => {
         left: "50%",
         transform: "translate(-50%, -50%)",
         zIndex: 9999,
-        width: "320px",
+        width: "380px",
         background: "var(--theme-surface)",
         border: "1px solid var(--theme-border)",
         borderRadius: "16px",
         boxShadow: "0 25px 60px rgba(0,0,0,0.5)",
-        padding: "20px",
+        padding: "24px",
         pointerEvents: "none",
       }}
     >
-      <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
         <img
           src={getIconUrl(skill.iconId)}
           alt=""
-          style={{ width: 48, height: 48, borderRadius: 8, flexShrink: 0 }}
+          style={{ width: 56, height: 56, borderRadius: 10, flexShrink: 0, background: "var(--theme-card)" }}
           onError={(e) => { e.target.style.display = "none"; }}
         />
         <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: 700, color: "var(--theme-text-main)", fontSize: 15, lineHeight: 1.3 }}>
+          <div style={{ fontWeight: 700, color: "var(--theme-text-main)", fontSize: 16, lineHeight: 1.3 }}>
             {skill.skillName}
           </div>
-          <div style={{ marginTop: 4 }}>
-            <span style={{
-              fontSize: 10, fontWeight: 700, padding: "2px 8px",
-              borderRadius: 20, background: cat.bg, color: cat.text
-            }}>
+          <div style={{ marginTop: 6, display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: cat.bg, color: cat.text }}>
               {skill.skillCategory}
             </span>
+            {skill.needSkillPoint > 0 && (
+              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: "rgba(234,179,8,0.15)", color: "#eab308" }}>
+                {skill.needSkillPoint} SP
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       {skill.skillDesc && (
-        <p style={{
-          marginTop: 12, fontSize: 12, color: "var(--theme-text-muted)",
-          lineHeight: 1.6, borderTop: "1px solid var(--theme-border)", paddingTop: 12
-        }}>
+        <p style={{ marginTop: 14, fontSize: 13, color: "var(--theme-text-muted)", lineHeight: 1.6, borderTop: "1px solid var(--theme-border)", paddingTop: 14 }}>
           {skill.skillDesc}
         </p>
       )}
 
       {skill.effectSummary && (
-        <div style={{
-          marginTop: 10, padding: "8px 12px", borderRadius: 8,
-          background: "rgba(217,70,62,0.08)", border: "1px solid rgba(217,70,62,0.2)"
-        }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#d9463e" }}>Effect: </span>
-          <span style={{ fontSize: 11, color: "var(--theme-text-main)" }}>{skill.effectSummary}</span>
-        </div>
-      )}
-
-      {skill.needSkillPoint > 0 && (
-        <div style={{ marginTop: 8, fontSize: 11, color: "var(--theme-text-muted)" }}>
-          Cost: <strong style={{ color: "var(--theme-text-main)" }}>{skill.needSkillPoint} SP</strong>
+        <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(217,70,62,0.08)", border: "1px solid rgba(217,70,62,0.2)" }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#d9463e" }}>Effect: </span>
+          <span style={{ fontSize: 12, color: "var(--theme-text-main)" }}>{skill.effectSummary}</span>
         </div>
       )}
     </div>
   );
 };
 
-// ===== SKILL CARD COMPONENT =====
-const SkillCard = ({ skill }) => {
+const SkillRow = ({ skill }) => {
   const [hovered, setHovered] = useState(false);
-  const cardRef = useRef(null);
-  const cat = CATEGORY_COLOR[skill.skillCategory] || { bg: "#334155", text: "#fff" };
-  const starColor = RARITY_STAR_COLOR[skill.rarity] || "#888";
+  const filterId = getFilterId(skill) || (skill.skillCategory === "Unique" ? "unique" : skill.skillCategory === "Special" ? "special" : null);
+  const cat = FILTER_COLOR_MAP[filterId] || { bg: "#334155", text: "#fff" };
 
   return (
     <>
       <div
-        ref={cardRef}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          gap: 8,
+          gap: 14,
+          padding: "10px 14px",
+          borderRadius: 10,
           cursor: "pointer",
-          transition: "transform 0.22s ease",
-          transform: hovered ? "translateY(-4px)" : "translateY(0)",
+          background: hovered ? "var(--theme-card)" : "transparent",
+          transition: "all 0.15s ease",
         }}
       >
-        {/* Icon Box */}
-        <div style={{
-          width: "100%",
-          aspectRatio: "1 / 1",
-          background: "var(--theme-card)",
-          border: `1.5px solid ${hovered ? "rgba(217,70,62,0.5)" : "var(--theme-border)"}`,
-          borderRadius: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          boxShadow: hovered
-            ? "0 8px 24px rgba(0,0,0,0.3)"
-            : "0 2px 6px rgba(0,0,0,0.1)",
-          transition: "all 0.22s ease",
-        }}>
-          <img
-            src={getIconUrl(skill.iconId)}
-            alt={skill.skillName}
-            style={{ width: "75%", height: "75%", objectFit: "contain" }}
-            onError={(e) => {
-              e.target.style.display = "none";
-              e.target.parentNode.innerHTML = `<span style="font-size:28px">⚡</span>`;
-            }}
-          />
-        </div>
+        <img
+          src={getIconUrl(skill.iconId)}
+          alt=""
+          style={{ width: 36, height: 36, borderRadius: 6, flexShrink: 0, background: "var(--theme-card)" }}
+          onError={(e) => { e.target.style.display = "none"; }}
+        />
 
-        {/* Name */}
-        <div style={{
-          textAlign: "center",
-          width: "100%",
-          paddingInline: 2,
-        }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontWeight: 700,
-            fontSize: 11,
-            color: hovered ? "#d9463e" : "var(--theme-text-main)",
-            lineHeight: 1.3,
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            transition: "color 0.2s",
-            minHeight: "2.6em",
-          }}>
-            {skill.skillName}
-          </div>
-
-          {/* Rarity stars */}
-          <div style={{ fontSize: 9, color: starColor, marginTop: 2 }}>
-            {"★".repeat(skill.rarity)}{"☆".repeat(Math.max(0, 3 - skill.rarity))}
-          </div>
-
-          {/* Category badge */}
-          <div style={{
-            display: "inline-block",
-            fontSize: 9,
-            fontWeight: 700,
-            padding: "1px 6px",
-            borderRadius: 20,
-            background: cat.bg,
-            color: cat.text,
-            marginTop: 4,
-            letterSpacing: "0.03em",
-            maxWidth: "100%",
+            fontWeight: 600,
+            fontSize: 14,
+            color: "var(--theme-text-main)",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
           }}>
-            {skill.skillCategory}
+            {skill.skillName}
           </div>
+          {skill.skillDesc && (
+            <div style={{
+              fontSize: 12,
+              color: "var(--theme-text-muted)",
+              marginTop: 2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              opacity: 0.7,
+            }}>
+              {skill.skillDesc}
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+          <span style={{
+            fontSize: 10,
+            fontWeight: 700,
+            padding: "3px 10px",
+            borderRadius: 20,
+            background: cat.bg + "22",
+            color: cat.bg,
+          }}>
+            {skill.skillCategory}
+          </span>
+
+          {skill.needSkillPoint > 0 && (
+            <span style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: "var(--theme-text-muted)",
+              minWidth: 48,
+              textAlign: "right",
+            }}>
+              {skill.needSkillPoint} SP
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Tooltip overlay */}
-      {hovered && <SkillTooltip skill={skill} anchorRef={cardRef} visible={hovered} />}
+      {hovered && <SkillTooltip skill={skill} visible={hovered} />}
     </>
   );
 };
 
-// ===== MAIN PAGE =====
 const SkillsPage = () => {
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedRarity, setSelectedRarity] = useState("All");
+  const [selectedFilter, setSelectedFilter] = useState("All");
 
   useEffect(() => {
     const fetchSkills = async () => {
@@ -248,158 +214,98 @@ const SkillsPage = () => {
       !searchTerm ||
       (s.skillName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.skillDesc || "").toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchCat = selectedCategory === "All" || s.skillCategory === selectedCategory;
-
-    const matchRarity = selectedRarity === "All" || s.rarity === selectedRarity;
-
-    return matchSearch && matchCat && matchRarity;
+    const matchCat =
+      selectedFilter === "All" ||
+      (typeof selectedFilter === "number" && Math.floor(s.iconId / 10) === selectedFilter) ||
+      (selectedFilter === "unique" && s.skillCategory === "Unique") ||
+      (selectedFilter === "special" && s.skillCategory === "Special");
+    return matchSearch && matchCat;
   });
 
   return (
-    <>
-      <style>{`
-        .skills-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 16px 12px;
-        }
-        @media (min-width: 480px)  { .skills-grid { grid-template-columns: repeat(5, 1fr); } }
-        @media (min-width: 640px)  { .skills-grid { grid-template-columns: repeat(6, 1fr); } }
-        @media (min-width: 768px)  { .skills-grid { grid-template-columns: repeat(8, 1fr); } }
-        @media (min-width: 1024px) { .skills-grid { grid-template-columns: repeat(10, 1fr); } }
-        @media (min-width: 1280px) { .skills-grid { grid-template-columns: repeat(12, 1fr); } }
-      `}</style>
-
-      <div className="flex-1">
-        {/* Header */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight text-text-main font-inter">
-              Skills
-            </h1>
-            <p className="text-text-muted mt-1.5 font-medium tracking-wide text-sm">
-              Browse all Uma Musume skills — filter by category and rarity.
-            </p>
-          </div>
-          <div className="relative w-full md:w-72">
-            <input
-              type="text"
-              placeholder="Search skills..."
-              className="w-full bg-card text-text-main px-5 py-3 rounded-xl border border-border outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-text-muted text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <span className="absolute right-4 top-3 text-text-muted">🔍</span>
-          </div>
-        </header>
-
-        {/* Filters */}
-        <div className="flex flex-col gap-4 mb-8 p-5 bg-card border border-border rounded-2xl">
-          {/* Category filter */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[10px] text-text-muted font-bold uppercase tracking-widest">
-              Category
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((cat) => {
-                const active = selectedCategory === cat;
-                const color = CATEGORY_COLOR[cat];
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(active ? "All" : cat)}
-                    style={{
-                      padding: "5px 12px",
-                      borderRadius: 8,
-                      fontSize: 11,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      border: active
-                        ? `1.5px solid ${color ? color.bg : "#d9463e"}`
-                        : "1.5px solid var(--theme-border)",
-                      background: active
-                        ? (color ? color.bg : "#d9463e")
-                        : "transparent",
-                      color: active ? (color ? color.text : "#fff") : "var(--theme-text-muted)",
-                      transition: "all 0.18s ease",
-                      transform: active ? "scale(1.04)" : "scale(1)",
-                    }}
-                  >
-                    {cat}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Rarity filter */}
-          <div className="flex flex-col gap-2">
-            <span className="text-[10px] text-text-muted font-bold uppercase tracking-widest">
-              Rarity
-            </span>
-            <div className="flex gap-2">
-              {RARITIES.map(({ label, value }) => {
-                const active = selectedRarity === value;
-                const starColor = RARITY_STAR_COLOR[value] || "#d9463e";
-                return (
-                  <button
-                    key={label}
-                    onClick={() => setSelectedRarity(active ? "All" : value)}
-                    style={{
-                      padding: "5px 14px",
-                      borderRadius: 8,
-                      fontSize: 12,
-                      fontWeight: 800,
-                      cursor: "pointer",
-                      border: active
-                        ? `1.5px solid ${starColor}`
-                        : "1.5px solid var(--theme-border)",
-                      background: active ? starColor + "22" : "transparent",
-                      color: active ? starColor : "var(--theme-text-muted)",
-                      transition: "all 0.18s ease",
-                      transform: active ? "scale(1.06)" : "scale(1)",
-                    }}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Count */}
-          <div className="text-[11px] text-text-muted">
-            Showing <strong className="text-text-main">{filtered.length}</strong> of{" "}
-            <strong className="text-text-main">{skills.length}</strong> skills
-          </div>
+    <div className="flex-1">
+      {/* Header */}
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-10">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight text-text-main font-inter">
+            Skills
+          </h1>
+          <p className="text-text-muted mt-1.5 font-medium tracking-wide text-sm">
+            Browse and filter all available skills in the game.
+          </p>
         </div>
+        <div className="relative w-full md:w-72">
+          <input
+            type="text"
+            placeholder="Search skills..."
+            className="w-full bg-card text-text-main px-5 py-3 rounded-xl border border-border outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-text-muted text-sm shadow-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <span className="absolute right-4 top-3 text-text-muted">🔍</span>
+        </div>
+      </header>
 
-        {/* Grid */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-40">
-            <div className="w-10 h-10 border-4 border-border border-t-primary rounded-full animate-spin" />
-            <p className="mt-6 text-text-muted font-bold tracking-widest uppercase text-[10px]">
-              Loading Skills...
-            </p>
-          </div>
-        ) : (
-          <div className="skills-grid">
-            {filtered.map((skill) => (
-              <SkillCard key={skill.skillId} skill={skill} />
-            ))}
-            {filtered.length === 0 && (
-              <div
-                style={{ gridColumn: "1 / -1", textAlign: "center", padding: "80px 0" }}
-                className="text-text-muted"
-              >
-                Không có kỹ năng nào phù hợp.
-              </div>
-            )}
-          </div>
-        )}
+      {/* Filter icons - matches GameTora's 17 + Unique & Special */}
+      <div className="flex flex-wrap items-center gap-2 mb-6 p-5 bg-card border border-border rounded-2xl">
+        {ALL_FILTERS.map((f) => {
+          const active = selectedFilter === f.id;
+          const color = f.color;
+          return (
+            <button
+              key={f.id}
+              onClick={() => setSelectedFilter(active ? "All" : f.id)}
+              title={f.label}
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 6,
+                cursor: "pointer",
+                border: `2px solid ${active ? color.bg : "transparent"}`,
+                background: active ? color.bg + "15" : "rgba(255,255,255,0.03)",
+                boxShadow: active ? `0 0 10px ${color.bg}66` : "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                opacity: active ? 1 : 0.55,
+              }}
+              className="hover:opacity-85 hover:scale-105 active:scale-95"
+            >
+              <img
+                src={getIconUrl(f.iconId)}
+                alt={f.label}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onError={(e) => { e.target.style.display = "none"; }}
+              />
+            </button>
+          );
+        })}
       </div>
-    </>
+
+      {/* List */}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-40">
+          <div className="w-8 h-8 border-3 border-border border-t-primary rounded-full animate-spin" />
+          <p className="mt-4 text-text-muted font-bold tracking-widest uppercase text-[10px]">Loading...</p>
+        </div>
+      ) : (
+        <div style={{ border: "1px solid var(--theme-border)", borderRadius: 12, overflow: "hidden" }}>
+          {filtered.map((skill, i) => (
+            <React.Fragment key={skill.skillId}>
+              {i > 0 && <div style={{ height: 1, background: "var(--theme-border)", marginInline: 14 }} />}
+              <SkillRow skill={skill} />
+            </React.Fragment>
+          ))}
+          {filtered.length === 0 && (
+            <div style={{ textAlign: "center", padding: "60px 0" }} className="text-text-muted">
+              Không có kỹ năng nào phù hợp.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 

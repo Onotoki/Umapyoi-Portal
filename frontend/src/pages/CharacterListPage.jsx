@@ -41,7 +41,7 @@ const CharacterListPage = () => {
         <div className="relative w-full md:w-72">
           <input
             type="text"
-            placeholder="Tìm kiếm..."
+            placeholder="Search characters..."
             className="w-full bg-card text-text-main px-5 py-3 rounded-xl border border-border outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-text-muted text-sm shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

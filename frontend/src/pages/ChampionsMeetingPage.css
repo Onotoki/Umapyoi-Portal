@@ -1,0 +1,52 @@
+.cm-avatar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+.cm-avatar-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cm-avatar-imgbox {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+.cm-avatar-imgbox img.avatar-main {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: transparent;
+  display: block;
+}
+.cm-avatar-strategy {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cm-avatar-strategy img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.cm-avatar-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  border: 2px solid #fff;
+  background: #fff;
+}
