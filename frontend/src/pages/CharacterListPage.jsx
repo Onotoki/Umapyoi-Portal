@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const CharacterListPage = () => {
   const [characters, setCharacters] = useState([]);
@@ -60,9 +61,10 @@ const CharacterListPage = () => {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-10">
           {filtered.map((chara) => (
-            <div
+            <Link
               key={chara._id || chara.name_en}
-              className="uma-card bg-card p-6 flex flex-col items-center text-center border-border shadow-sm group"
+              to={`/characters/${encodeURIComponent(chara.name_en)}${chara.alt_name ? `?variant=${encodeURIComponent(chara.alt_name)}` : ""}`}
+              className="uma-card bg-card p-6 flex flex-col items-center text-center border-border shadow-sm group no-underline"
             >
               <div className="relative mb-4 inline-block">
                 <img
@@ -84,7 +86,7 @@ const CharacterListPage = () => {
                   {"⭐".repeat(chara.stars || 3)}
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
           {filtered.length === 0 && (
             <div className="col-span-full text-center py-40 bg-card rounded-2xl border border-dashed border-border">

@@ -35,3 +35,14 @@ dist/
 **/dist/
 build/
 **/build/
+
+# Log files
+*.log
+**/*.log
+
+# Temporary files
+frontend/public/tmp/
+**/tmp/
+
+# Scripts
+backend/scripts/

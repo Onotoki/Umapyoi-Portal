@@ -59,6 +59,19 @@ import "./ChampionsMeetingPage.css";
 
 const badgeIconMap = {};
 
+const avatarGlowStyleMap = {
+  green: {
+    boxShadow: "none",
+    filter:
+      "brightness(0.18) saturate(120%) contrast(1.25) drop-shadow(0 0 4px #19e05f) drop-shadow(0 0 10px rgba(25,224,95,0.85)) drop-shadow(0 0 16px rgba(25,224,95,0.55))",
+  },
+  red: {
+    boxShadow: "none",
+    filter:
+      "brightness(0.16) saturate(140%) contrast(1.3) sepia(1) saturate(420%) hue-rotate(315deg) drop-shadow(0 0 4px #ff2f2f) drop-shadow(0 0 10px rgba(255,47,47,0.85)) drop-shadow(0 0 16px rgba(255,47,47,0.55))",
+  },
+};
+
 function getBestStrategyFromName(name, umaMap) {
   if (!umaMap || !name) return null;
   const entry = umaMap[name.toLowerCase()];
@@ -74,11 +87,12 @@ function getBestStrategyFromName(name, umaMap) {
 
 const TierSection = ({ tier, characters, umaMap }) => {
   const tierColors = {
-    S: { bg: "#fefce8", border: "#eab308", text: "#ca8a04", gradient: "135deg, #facc15 0%, #eab308 100%" },
-    A: { bg: "#fff7ed", border: "#f97316", text: "#ea580c", gradient: "135deg, #fb923c 0%, #ea580c 100%" },
-    B: { bg: "#fdf2f8", border: "#ec4899", text: "#db2777", gradient: "135deg, #f472b6 0%, #ec4899 100%" },
+    S: { stops: ["#ffe76f", "#f4bf22", "#df9704"], stroke: "#8a6100" },
+    A: { stops: ["#fff8ef", "#ffd8b4", "#f19045"], stroke: "#bf4f16" },
+    B: { stops: ["#ffc0d8", "#ff73aa", "#e7367a"], stroke: "#a81755" },
   };
   const c = tierColors[tier.label] || tierColors.B;
+  const gradientId = `tier-${tier.label}-gradient`;
 
   return (
     <div className="mb-5">
@@ -92,25 +106,40 @@ const TierSection = ({ tier, characters, umaMap }) => {
       >
         <span
           style={{
-            minWidth: 56,
-            minHeight: 56,
-            maxWidth: 56,
-            maxHeight: 56,
-            background: `linear-gradient(${c.gradient})`,
-            border: `2px solid ${c.border}`,
-            color: '#fff',
-            borderRadius: 16,
+            minWidth: 72,
+            minHeight: 72,
+            maxWidth: 72,
+            maxHeight: 72,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontWeight: 800,
-            fontSize: 30,
             flexShrink: 0,
-            textShadow: `0 1px 4px ${c.border}88`,
-            boxShadow: `0 4px 20px -4px ${c.border}66, inset 0 1px 0 rgba(255,255,255,0.3)`,
           }}
         >
-          {tier.label}
+          <svg width="72" height="72" viewBox="0 0 72 72" aria-label={tier.label}>
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={c.stops[0]} />
+                <stop offset="50%" stopColor={c.stops[1]} />
+                <stop offset="100%" stopColor={c.stops[2]} />
+              </linearGradient>
+            </defs>
+            <text
+              x="50%"
+              y="54%"
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fill={`url(#${gradientId})`}
+              stroke={c.stroke}
+              strokeWidth="3"
+              paintOrder="stroke fill"
+              fontFamily="Arial Black, Impact, sans-serif"
+              fontSize="58"
+              fontWeight="900"
+            >
+              {tier.label}
+            </text>
+          </svg>
         </span>
         <div className="cm-avatar-row">
           {tier.characters.map((entry, idx) => {
@@ -143,6 +172,7 @@ const TierSection = ({ tier, characters, umaMap }) => {
                       "https://placehold.co/60x60/1a1a2e/666?text=?"
                     }
                     alt={name}
+                    style={avatarGlowStyleMap[entry.glow]}
                     onError={(e) => {
                       e.target.src =
                         "https://placehold.co/60x60/1a1a2e/666?text=?";
@@ -245,6 +275,9 @@ const uniqueSkillOwnerMap = {
   "Lights of Vaudeville": "Fuji Kiseki",
   "All Charged! It's Go Time!": "Ines Fujin",
   "Operation Cacao": { name: "Mihono Bourbon", preferVariant: true },
+  "Barcarole of Blessings": { name: "TM Opera O", preferVariant: true },
+  "Moving Past, and Beyond": "Mejiro Dober",
+  "Eternal Encompassing Shine": "Satono Diamond",
 };
 
 const normalizeSkillName = (name) =>
@@ -266,10 +299,11 @@ const uniqueSkillOwnerNormMap = Object.entries(uniqueSkillOwnerMap).reduce(
 const goldHighlightSkillNames = new Set(["Speed Star", "Daring Strike"]);
 const rngSkillNames = new Set([
   "Final Push",
-  "Head On",
+  "Head-On",
   "Ignited Spirit PWR",
   "Nimble Navigator",
   "Slick Surge",
+  "Take the Chance",
   "Updrafters",
 ]);
 
@@ -366,6 +400,35 @@ const SkillCard = ({ skillData, characters, forceGold = false, displayName }) =>
           style={{ width: 28, height: 28, borderRadius: 14, objectFit: "cover", border: "2px solid #d0c8e8" }}
         />
       )}
+    </div>
+  );
+};
+
+const GreenSkillCard = ({ skillData, name }) => {
+  if (!skillData) return null;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        minHeight: 62,
+        padding: "10px 12px",
+        borderRadius: 6,
+        border: "1px solid rgba(86, 74, 105, 0.22)",
+        background: "linear-gradient(to right, #eee9f2, #c8c4d4)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(27, 20, 38, 0.12)",
+      }}
+    >
+      <img
+        src={`https://gametora.com/images/umamusume/skill_icons/utx_ico_skill_${skillData.iconId}.png`}
+        alt=""
+        style={{ width: 40, height: 40, borderRadius: 6, objectFit: "cover", flexShrink: 0 }}
+      />
+      <span style={{ fontSize: 18, fontWeight: 900, color: "#6b4729", lineHeight: 1.15 }}>
+        {name}
+      </span>
     </div>
   );
 };
@@ -673,6 +736,152 @@ const ChampionsMeetingPage = () => {
           ))}
         </div>
       </section>
+      {data.greenSkills && (
+        <section className="mb-10">
+          <h2
+            className="text-xl font-bold text-text-main mb-4 flex items-center gap-3"
+            style={{
+              letterSpacing: '-0.02em',
+              textShadow: '0 1px 4px rgba(0,0,0,0.06)',
+              borderLeft: '4px solid var(--theme-text-main)',
+              paddingLeft: 14,
+            }}
+          >
+            <span>Green Skills</span>
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: 10,
+            }}
+          >
+            {data.greenSkills.map((item) => (
+              <GreenSkillCard key={item.skillId} skillData={skillMap[item.skillId]} name={item.name} />
+            ))}
+          </div>
+        </section>
+      )}
+      {data.oguriOnly && (
+        <section className="mb-10">
+          <h2
+            className="text-xl font-bold text-text-main mb-4 flex items-center gap-3"
+            style={{
+              letterSpacing: '-0.02em',
+              textShadow: '0 1px 4px rgba(0,0,0,0.06)',
+              borderLeft: '4px solid var(--theme-text-main)',
+              paddingLeft: 14,
+            }}
+          >
+            {(() => {
+              const oguri = getCharacterImage(data.oguriOnly.character.name, characters, !!data.oguriOnly.character.variant);
+              return oguri?.image_url ? (
+                <img src={oguri.image_url} alt="Oguri Cap" style={{ width: 42, height: 42, borderRadius: 6, objectFit: "contain" }} />
+              ) : null;
+            })()}
+            <span>Xmas Oguri ONLY</span>
+          </h2>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+          <div style={{ background: "var(--theme-card)", border: "1px solid var(--theme-border)", borderRadius: 12, padding: "16px 14px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {data.oguriOnly.sections.map((section) => (
+                <div key={section.title}>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "var(--theme-text-main)", marginBottom: 8 }}>
+                    {section.title}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {section.items.map((item) => (
+                      <div key={`${section.title}-${item.skillId}-${item.reason}`} style={{ flex: "0 1 calc(50% - 4px)", minWidth: 0 }}>
+                        <SkillCard
+                          skillData={skillMap[item.skillId]}
+                          characters={characters}
+                          forceGold={!!item.gold}
+                          displayName={item.reason}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ background: "var(--theme-card)", border: "1px solid var(--theme-border)", borderRadius: 12, padding: "16px 14px", overflowX: "auto" }}>
+            <h3 style={{ fontSize: 22, fontWeight: 800, color: "var(--theme-text-main)", marginBottom: 12 }}>
+              Recommended Stats
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 22 }}>
+              {data.oguriOnly.stats.map((row) => (
+                <div key={row.key} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+                  <img src={row.icon} alt={row.key} style={{ width: 40, height: 40, flexShrink: 0 }} />
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: 6, flex: 1, minWidth: 0 }}>
+                    {Object.values(data.stats).map((stat, idx) => (
+                      <div key={stat.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minHeight: 74, minWidth: 0 }}>
+                        <img src={stat.icon} alt={stat.label} style={{ width: 26, height: 26, objectFit: "contain" }} />
+                        <span style={{ fontSize: 14, fontWeight: 900, color: stat.color, whiteSpace: "nowrap" }}>
+                          {row.values[idx]}
+                        </span>
+                        {idx === 1 && (
+                          <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
+                            {[0, 1, 2].map((i) => (
+                              <img
+                                key={i}
+                                src="https://gametora.com/images/umamusume/skill_icons/utx_ico_skill_20021.png"
+                                alt="Recovery"
+                                style={{ width: 18, height: 18, borderRadius: 4, objectFit: "cover" }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <h3 style={{ fontSize: 22, fontWeight: 800, color: "var(--theme-text-main)", marginBottom: 10 }}>
+              Recovery Consistency
+            </h3>
+            <p style={{ fontSize: 13, lineHeight: 1.45, color: "var(--theme-text-muted)", marginBottom: 14 }}>
+              Required Stamina recommendations assume recoveries activate. This table shows the chance based on Wisdom and recovery count.
+            </p>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, color: "var(--theme-text-main)" }}>
+              <thead>
+                <tr>
+                  {["Wit:", "300", "400", "500", "600", "700", "800"].map((cell) => (
+                    <th key={cell} style={{ border: "1px solid var(--theme-border)", padding: "7px 6px", textAlign: "center", fontWeight: 900 }}>
+                      {cell}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["1 Gold Recovery", "70.0%", "77.5%", "82.0%", "85.0%", "87.1%", "88.8%"],
+                  ["1 of 2 Gold Recoveries", "91.0%", "94.9%", "96.8%", "97.8%", "98.3%", "98.7%"],
+                  ["2 Gold Recoveries", "49.0%", "60.1%", "67.2%", "72.3%", "75.9%", "78.9%"],
+                  ["2 of 3 Gold Recoveries", "78.4%", "87.1%", "91.4%", "93.9%", "95.4%", "96.5%"],
+                  ["2 of 4 Gold Recoveries", "91.6%", "96.2%", "98.0%", "98.8%", "99.2%", "99.5%"],
+                  ["3 Gold Recoveries", "34.4%", "46.5%", "55.1%", "61.4%", "66.1%", "70.0%"],
+                  ["3 of 4 Gold Recoveries", "65.2%", "78.0%", "84.9%", "89.0%", "91.7%", "93.6%"],
+                  ["4 Gold Recoveries", "24.0%", "36.1%", "45.2%", "52.2%", "57.6%", "62.2%"],
+                  ["4 of 5 Gold Recoveries", "52.8%", "68.5%", "77.8%", "83.5%", "87.3%", "90.0%"],
+                ].map((row) => (
+                  <tr key={row[0]}>
+                    {row.map((cell, idx) => (
+                      <td key={`${row[0]}-${idx}`} style={{ border: "1px solid var(--theme-border)", padding: "7px 6px", textAlign: idx === 0 ? "right" : "center", background: idx === 0 ? "rgba(255,255,255,0.03)" : "transparent", whiteSpace: "nowrap" }}>
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

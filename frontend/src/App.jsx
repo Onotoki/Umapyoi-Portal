@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CharacterListPage from './pages/CharacterListPage';
+import CharacterDetailPage from './pages/CharacterDetailPage';
+import ErrorBoundary from './components/ErrorBoundary';
 import SupportCardsPage from './pages/SupportCardsPage';
 import GuidesPage from './pages/GuidesPage';
 import DonatePage from './pages/DonatePage';
@@ -82,6 +84,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/characters" element={<CharacterListPage />} />
+          <Route path="/characters/:name" element={<ErrorBoundary><CharacterDetailPage /></ErrorBoundary>} />
           <Route path="/support-cards" element={<SupportCardsPage />} />
           <Route path="/guides" element={<GuidesPage />} />
           <Route path="/donate" element={<DonatePage />} />

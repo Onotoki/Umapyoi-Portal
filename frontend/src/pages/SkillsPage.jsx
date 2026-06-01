@@ -77,11 +77,6 @@ const SkillTooltip = ({ skill, visible }) => {
             <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: cat.bg, color: cat.text }}>
               {skill.skillCategory}
             </span>
-            {skill.needSkillPoint > 0 && (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: "rgba(234,179,8,0.15)", color: "#eab308" }}>
-                {skill.needSkillPoint} SP
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -167,18 +162,6 @@ const SkillRow = ({ skill }) => {
           }}>
             {skill.skillCategory}
           </span>
-
-          {skill.needSkillPoint > 0 && (
-            <span style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: "var(--theme-text-muted)",
-              minWidth: 48,
-              textAlign: "right",
-            }}>
-              {skill.needSkillPoint} SP
-            </span>
-          )}
         </div>
       </div>
 
@@ -214,12 +197,13 @@ const SkillsPage = () => {
       !searchTerm ||
       (s.skillName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.skillDesc || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const noInheritedUnique = s.skillId >= 900000;
     const matchCat =
       selectedFilter === "All" ||
       (typeof selectedFilter === "number" && Math.floor(s.iconId / 10) === selectedFilter) ||
       (selectedFilter === "unique" && s.skillCategory === "Unique") ||
       (selectedFilter === "special" && s.skillCategory === "Special");
-    return matchSearch && matchCat;
+    return matchSearch && matchCat && !noInheritedUnique;
   });
 
   return (
