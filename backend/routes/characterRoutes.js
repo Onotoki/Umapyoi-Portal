@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs');
 const Character = require('../models/Character');
+const { fetchGtSkillsMap } = require('../gametoraSkills');
 
 // Load local skill definitions from uma_data.js v array
 let _skillsCache = null;
@@ -18,11 +19,7 @@ function getLocalSkills() {
 }
 
 // Skill definitions for IDs not in the local v array
-const missingSkillOverrides = {
-  100341: { skillId: 100341, skillName: "Now We're Cruisin'!", iconId: 20011, skillCategory: 'Unique', skillDesc: 'Greatly increase velocity when competing for the lead.', rarity: 1 },
-  110221: { skillId: 110221, skillName: 'Best Day Ever', iconId: 20011, skillCategory: 'Unique', skillDesc: 'If well-positioned late-race on the final corner or later, increase velocity. If there\'s a large distance left to the finish, also increase acceleration very slightly with perfect form.', rarity: 1 },
-  110381: { skillId: 110381, skillName: 'One True Color', iconId: 20011, skillCategory: 'Unique', skillDesc: 'If positioned toward the front with 350m or less remaining and there is another Umamusume close behind, increase velocity and acceleration.', rarity: 1 },
-};
+const missingSkillOverrides = {};
 
 const buildExtra = (match) => {
   if (!match) return null;
@@ -222,18 +219,32 @@ const fetchGametoraData = async (urlName) => {
   const skills_event = toArray(item.skills_event);
   const skills_evo = toArray(item.skills_evo);
 
-  // Build skill definitions for all referenced skill IDs
+  // Build skill definitions from GameTora data API (with local fallback)
   const localSkills = getLocalSkills();
   const localSkillMap = {};
   localSkills.forEach(s => { localSkillMap[s.skillId] = s; });
+
+  const gtSkillsMap = await fetchGtSkillsMap();
 
   const allSkillIds = [...skills_unique, ...skills_innate, ...skills_awakening, ...skills_event];
   skills_evo.forEach(evo => { if (evo && evo.old) allSkillIds.push(evo.old); if (evo && evo.new) allSkillIds.push(evo.new); });
 
   const skillDefinitions = {};
   allSkillIds.forEach(id => {
-    if (localSkillMap[id]) {
-      skillDefinitions[id] = localSkillMap[id];
+    const gt = gtSkillsMap[id];
+    const local = localSkillMap[id];
+    if (gt && local) {
+      skillDefinitions[id] = {
+        ...local,
+        ...gt,
+        skillCategory: gt.skillCategory === 'Unique' ? 'Unique' : (local.skillCategory || 'Passive'),
+        skillName: gt.skillName || local.skillName,
+        skillDesc: gt.skillDesc || local.skillDesc,
+      };
+    } else if (gt) {
+      skillDefinitions[id] = gt;
+    } else if (local) {
+      skillDefinitions[id] = local;
     } else if (missingSkillOverrides[id]) {
       skillDefinitions[id] = missingSkillOverrides[id];
     }

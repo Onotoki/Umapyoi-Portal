@@ -22,13 +22,16 @@ const GAMETORA_FILTERS = [
 
 const EXTRA_FILTERS = [
   { id: "unique", iconId: 20013, label: "Unique", color: { bg: "#7c3aed", text: "#fff" } },
-  { id: "special", iconId: 1010011, label: "Special", color: { bg: "#b45309", text: "#fff" } },
 ];
 
 const ALL_FILTERS = [...GAMETORA_FILTERS, ...EXTRA_FILTERS];
 
 const FILTER_COLOR_MAP = Object.fromEntries(
   ALL_FILTERS.map((f) => [f.id, f.color])
+);
+
+const FILTER_LABEL_MAP = Object.fromEntries(
+  ALL_FILTERS.map((f) => [f.id, f.label])
 );
 
 const getIconUrl = (iconId) =>
@@ -40,10 +43,25 @@ const getFilterId = (skill) => {
   return null;
 };
 
+const CATEGORY_LABEL_MAP = {
+  'Acceleration': 'Accel',
+  'Speed Boost': 'Velocity',
+};
+
+const getBadgeLabel = (skill) => {
+  if (skill.effectTypeLabel) return skill.effectTypeLabel;
+  return CATEGORY_LABEL_MAP[skill.skillCategory] || skill.skillCategory;
+};
+
+const getBadgeColor = (skill) => {
+  if (skill.skillCategory === 'Debuff') return { bg: '#dc2626', text: '#fff' };
+  const filterId = getFilterId(skill) || (skill.skillCategory === 'Unique' ? 'unique' : null);
+  return FILTER_COLOR_MAP[filterId] || { bg: '#334155', text: '#fff' };
+};
+
 const SkillTooltip = ({ skill, visible }) => {
   if (!visible) return null;
-  const filterId = getFilterId(skill) || (skill.skillCategory === "Unique" ? "unique" : skill.skillCategory === "Special" ? "special" : null);
-  const cat = FILTER_COLOR_MAP[filterId] || { bg: "#334155", text: "#fff" };
+  const cat = getBadgeColor(skill);
 
   return (
     <div
@@ -75,8 +93,13 @@ const SkillTooltip = ({ skill, visible }) => {
           </div>
           <div style={{ marginTop: 6, display: "flex", gap: 8, alignItems: "center" }}>
             <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: cat.bg, color: cat.text }}>
-              {skill.skillCategory}
+              {getBadgeLabel(skill)}
             </span>
+            {skill.characterLabel && (
+              <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 10px", borderRadius: 20, background: "#d9463e", color: "#fff" }}>
+                {skill.characterLabel}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -89,8 +112,10 @@ const SkillTooltip = ({ skill, visible }) => {
 
       {skill.effectSummary && (
         <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(217,70,62,0.08)", border: "1px solid rgba(217,70,62,0.2)" }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: "#d9463e" }}>Effect: </span>
-          <span style={{ fontSize: 12, color: "var(--theme-text-main)" }}>{skill.effectSummary}</span>
+          <div><span style={{ fontSize: 12, fontWeight: 700, color: "#d9463e" }}>Effect: </span><span style={{ fontSize: 12, color: "var(--theme-text-main)" }}>{skill.effectSummary}</span></div>
+          {skill.baseDuration != null && (
+            <div style={{ marginTop: 4 }}><span style={{ fontSize: 12, fontWeight: 700, color: "#d9463e" }}>Base duration: </span><span style={{ fontSize: 12, color: "var(--theme-text-main)" }}>{skill.baseDuration}s</span></div>
+          )}
         </div>
       )}
     </div>
@@ -99,8 +124,7 @@ const SkillTooltip = ({ skill, visible }) => {
 
 const SkillRow = ({ skill }) => {
   const [hovered, setHovered] = useState(false);
-  const filterId = getFilterId(skill) || (skill.skillCategory === "Unique" ? "unique" : skill.skillCategory === "Special" ? "special" : null);
-  const cat = FILTER_COLOR_MAP[filterId] || { bg: "#334155", text: "#fff" };
+  const cat = getBadgeColor(skill);
 
   return (
     <>
@@ -160,8 +184,21 @@ const SkillRow = ({ skill }) => {
             background: cat.bg + "22",
             color: cat.bg,
           }}>
-            {skill.skillCategory}
+            {getBadgeLabel(skill)}
           </span>
+          {skill.characterLabel && (
+            <span style={{
+              fontSize: 10,
+              fontWeight: 600,
+              padding: "3px 10px",
+              borderRadius: 20,
+              background: "#d9463e22",
+              color: "#d9463e",
+              whiteSpace: "nowrap",
+            }}>
+              {skill.characterLabel}
+            </span>
+          )}
         </div>
       </div>
 
@@ -201,8 +238,7 @@ const SkillsPage = () => {
     const matchCat =
       selectedFilter === "All" ||
       (typeof selectedFilter === "number" && Math.floor(s.iconId / 10) === selectedFilter) ||
-      (selectedFilter === "unique" && s.skillCategory === "Unique") ||
-      (selectedFilter === "special" && s.skillCategory === "Special");
+      (selectedFilter === "unique" && s.skillCategory === "Unique");
     return matchSearch && matchCat && !noInheritedUnique;
   });
 
@@ -230,7 +266,7 @@ const SkillsPage = () => {
         </div>
       </header>
 
-      {/* Filter icons - matches GameTora's 17 + Unique & Special */}
+      {/* Filter icons - matches GameTora's 17 + Unique */}
       <div className="flex flex-wrap items-center gap-2 mb-6 p-5 bg-card border border-border rounded-2xl">
         {ALL_FILTERS.map((f) => {
           const active = selectedFilter === f.id;

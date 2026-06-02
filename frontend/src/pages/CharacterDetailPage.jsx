@@ -36,36 +36,60 @@ const SkillItem = ({ skillId, skillMap, style }) => {
   const s = skillMap[skillId];
   if (!s) {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 6, background: "var(--theme-card)", border: "1px solid var(--theme-border)", ...style }}>
-        <div style={{ width: 28, height: 28, borderRadius: 5, background: "var(--theme-border)" }} />
-        <span style={{ fontSize: 12, color: "var(--theme-text-muted)" }}>Skill #{skillId}</span>
+      <div style={{ display: "grid", gridTemplateColumns: "56px 1fr", gap: 0, padding: "6px 8px", borderRadius: 6, background: "#232323", border: "1px solid #333", ...style }}>
+        <div style={{ display: "flex", justifyContent: "center", paddingTop: 5 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 6, background: "#333" }} />
+        </div>
+        <div style={{ padding: "5px 10px" }}>
+          <span style={{ fontSize: 13, color: "#888" }}>Skill #{skillId}</span>
+        </div>
       </div>
     );
   }
   const isUnique = s.skillCategory === "Unique" || s.skillId >= 900000;
   return (
     <div style={{
-      display: "flex", alignItems: "center", gap: 8,
+      display: "grid", gridTemplateColumns: "56px 1fr", gap: 0,
       padding: "6px 8px", borderRadius: 6,
-      background: isUnique ? "linear-gradient(to right, #cfd2f4, #d9cff1, #f0d1ea)" : "var(--theme-card)",
-      border: isUnique ? "1px solid #c8c4e0" : "1px solid var(--theme-border)",
+      background: "#232323", border: "1px solid #333",
       ...style,
     }}>
-      <img
-        src={`https://gametora.com/images/umamusume/skill_icons/utx_ico_skill_${s.iconId}.png`}
-        alt=""
-        style={{ width: 28, height: 28, borderRadius: 5, objectFit: "cover", flexShrink: 0 }}
-        onError={(e) => { e.target.style.display = "none"; }}
-      />
-      <span style={{ fontSize: 12, fontWeight: 700, color: isUnique ? "#3d2d5c" : "var(--theme-text-main)", lineHeight: 1.3 }}>{s.skillName}</span>
+      <div style={{ display: "flex", justifyContent: "center", paddingTop: 5 }}>
+        <img
+          src={`https://gametora.com/images/umamusume/skill_icons/utx_ico_skill_${s.iconId}.png`}
+          alt=""
+          style={{ width: 44, height: 44, borderRadius: 6, objectFit: "cover", flexShrink: 0 }}
+          onError={(e) => { e.target.style.display = "none"; }}
+        />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, padding: "4px 10px" }}>
+        <div style={{
+          display: "inline-block",
+          padding: "2px 8px",
+          borderRadius: 5,
+          fontWeight: 800,
+          fontSize: 13,
+          lineHeight: 1.4,
+          ...(isUnique
+            ? { background: "linear-gradient(90deg, #deffd6 0%, #b5d7ff 50%, #ffaff0 100%)", color: "#794016" }
+            : { background: "linear-gradient(90deg, #fefffe, #bdbecd)", color: "#333" }
+          ),
+          alignSelf: "flex-start",
+        }}>
+          {s.skillName}
+        </div>
+        {(s.skillDesc || s.description) && (
+          <span style={{ fontSize: 15, color: "#bbb", lineHeight: 1.5 }}>{s.skillDesc || s.description}</span>
+        )}
+      </div>
     </div>
   );
 };
 
 const SectionTitle = ({ children }) => (
-  <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--theme-text-main)", marginBottom: 10, paddingBottom: 6, borderBottom: "2px solid var(--theme-border)" }}>
+  <h2 style={{ fontSize: 28, fontWeight: 900, color: "var(--theme-text-main)", textAlign: "center", marginBottom: 12 }}>
     {children}
-  </h3>
+  </h2>
 );
 
 const RaceIcon = ({ iconId }) => {
@@ -283,8 +307,8 @@ function CharacterDetailPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 36 }}>
               {uq.length > 0 && (
                 <div>
-                  <SectionTitle>Unique Skills</SectionTitle>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <SectionTitle>Unique skills</SectionTitle>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {uq.map(id => <SkillItem key={id} skillId={id} skillMap={skillMap} />)}
                   </div>
                 </div>
@@ -292,8 +316,8 @@ function CharacterDetailPage() {
 
               {inn.length > 0 && (
                 <div>
-                  <SectionTitle>Innate Skills</SectionTitle>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <SectionTitle>Innate skills</SectionTitle>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {inn.map(id => <SkillItem key={id} skillId={id} skillMap={skillMap} />)}
                   </div>
                 </div>
@@ -302,7 +326,7 @@ function CharacterDetailPage() {
               {aw.length > 0 && (
                 <div>
                   <SectionTitle>Awakening Skills</SectionTitle>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {aw.map(id => <SkillItem key={id} skillId={id} skillMap={skillMap} />)}
                   </div>
                 </div>
@@ -311,7 +335,7 @@ function CharacterDetailPage() {
               {ev.length > 0 && (
                 <div>
                   <SectionTitle>Skills from Events</SectionTitle>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     {ev.map(id => <SkillItem key={id} skillId={id} skillMap={skillMap} />)}
                   </div>
                 </div>

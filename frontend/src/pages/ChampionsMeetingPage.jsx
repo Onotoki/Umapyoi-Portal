@@ -325,17 +325,17 @@ const SkillCard = ({ skillData, characters, forceGold = false, displayName }) =>
         gap: 8,
         padding: "6px 8px",
         background: isUnique
-          ? "linear-gradient(to right, #cfd2f4 0%, #d9cff1 45%, #f0d1ea 100%)"
+          ? "linear-gradient(90deg, #deffd6 0%, #b5d7ff 50%, #ffaff0 100%)"
           : isGoldHighlight
             ? "linear-gradient(135deg, #f6e3a1 0%, #efc86a 55%, #e8b95b 100%)"
           : "linear-gradient(to bottom, #ffffff 0%, #e8e5ec 50%, #d2cdd8 100%)",
         border: isUnique
-          ? "1px solid #c8c4e0"
+          ? "1px solid #b8d8c8"
           : isGoldHighlight
             ? "1px solid #c89634"
             : "1px solid #b0aab8",
         boxShadow: isUnique
-          ? "inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 6px rgba(140,120,200,0.15)"
+          ? "none"
           : isGoldHighlight
             ? "inset 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px rgba(255,206,120,0.45), 0 3px 10px rgba(154,106,27,0.22)"
           : "inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 3px rgba(0,0,0,0.06)",
@@ -384,7 +384,7 @@ const SkillCard = ({ skillData, characters, forceGold = false, displayName }) =>
           style={{
             fontWeight: 700,
             fontSize: 12,
-            color: isUnique ? "#3d2d5c" : isGoldHighlight ? "#5a3900" : "#1a1a2e",
+            color: isUnique ? "#794016" : isGoldHighlight ? "#5a3900" : "#1a1a2e",
             whiteSpace: "normal",
             wordBreak: "break-word",
             lineHeight: 1.3,
