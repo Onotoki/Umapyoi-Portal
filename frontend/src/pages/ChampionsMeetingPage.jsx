@@ -278,6 +278,7 @@ const uniqueSkillOwnerMap = {
   "Barcarole of Blessings": { name: "TM Opera O", preferVariant: true },
   "Moving Past, and Beyond": "Mejiro Dober",
   "Eternal Encompassing Shine": "Satono Diamond",
+  "Pure Heart": "Super Creek",
 };
 
 const normalizeSkillName = (name) =>

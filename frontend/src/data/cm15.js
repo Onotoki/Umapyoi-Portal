@@ -314,7 +314,7 @@ const CM15_DATA = {
           { skillId: 200562, reason: "Stamina to Spare" },
           { skillId: 201142, reason: "Soft Step" },
           { skillId: 210022, reason: "Ignited Spirit STA" },
-          { skillId: 900451, reason: "Pure Heart (Super Creek)" },
+          { skillId: 900451, reason: "Pure Heart" },
         ],
       },
       {
