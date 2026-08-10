@@ -2,15 +2,17 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 // Script to sync local database to MongoDB Atlas
-const localURI = 'mongodb://127.0.0.1:27017/umapyoi';
+const localURI = process.env.LOCAL_MONGO_URI || 'mongodb://127.0.0.1:27017/umapyoi';
 
-// You will run this by providing the Atlas URI like:
-// node sync_to_atlas.js "mongodb+srv://username:password@cluster.mongodb.net/umapyoi"
-const atlasURI = process.argv[2];
+// Atlas URI: CLI arg > ATLAS_URI env > MONGO_URI env (if not local)
+const atlasURI = process.argv[2]
+  || process.env.ATLAS_URI
+  || (process.env.MONGO_URI && !process.env.MONGO_URI.includes('127.0.0.1') ? process.env.MONGO_URI : null);
 
 if (!atlasURI) {
   console.error('\n❌ Lỗi: Bạn cần cung cấp chuỗi kết nối MongoDB Atlas!');
-  console.log('👉 Cú pháp chạy: node sync_to_atlas.js "mongodb+srv://<username>:<password>@<cluster>.mongodb.net/umapyoi"\n');
+  console.log('👉 Cách 1: node sync_to_atlas.js "mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/umapyoi"');
+  console.log('👉 Cách 2: đặt ATLAS_URI trong backend/.env rồi chạy node sync_to_atlas.js\n');
   process.exit(1);
 }
 
