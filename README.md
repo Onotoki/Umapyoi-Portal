@@ -1,5 +1,7 @@
 # 🥕 Umapyoi Portal
 
+> 🌐 **Live:** https://umapyoi-portal-frontend.onrender.com/
+
 Trang web tiếng Anh dành cho game **Umamusume: Pretty Derby** — tra cứu nhân vật (thân thê / ウマ娘), thẻ hỗ trợ (support cards), kỹ năng (skills) và meta Champions Meeting.
 
 Dữ liệu được lấy từ **GameTora** (CDN + scraping) kết hợp với dữ liệu local.
